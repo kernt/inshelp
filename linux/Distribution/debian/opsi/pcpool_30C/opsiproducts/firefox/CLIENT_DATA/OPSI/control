@@ -1,0 +1,22 @@
+[Package]
+version: 1
+depends:
+incremental: False
+
+[Product]
+type: localboot
+id: firefox
+name: Firefox
+description:
+advice:
+version: 26.0
+priority: 0
+licenseRequired: False
+productClasses:
+setupScript: setup.ins
+uninstallScript:
+updateScript:
+alwaysScript:
+onceScript:
+customScript:
+userLoginScript:
