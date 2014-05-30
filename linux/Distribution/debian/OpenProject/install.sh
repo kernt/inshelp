@@ -5,17 +5,19 @@
 # Autor : Tobias Kern
 # Datum : 16-04-2014
 # Lizenz : GPLv3
-# Depends : wget , git
+# Depends : wget , git, Ruby >= 2.1.0, Bundler, Database (mysql 5.x||postgresql 8.x)
 # Use : execute it
 #  
 # Description:
 # Source: 
-# https://www.openproject.org/projects/openproject/wiki/Installation_on_Centos_65_x64_with_Apache_and_PostgreSQL_93
+#
 ####################################################################################################
 ## Notise: no tested
 ##
 ####################################################################################################
 #
+
+TMPDIR=/tmp/
 
 if [ `id -u` != 0 ]; then
     echo "Please login as ROOT user to execute your script : $@!"
@@ -24,25 +26,22 @@ if [ `id -u` != 0 ]; then
 fi
 
 # Update your system
-yum update
+apt-get update
 
 # Install tools needed for DB and Ruby 
-yum install git wget
-yum - groupinstall "Development tools"
+apt-get -y install git wget curl
 
 #Install some handy tools
-yum -y install vim mlocate
+apt-get -y install vim mlocate
+apt-get -y install postgresql-9.1 make libxml2-dev libxslt-dev g++ libpq-dev
 
 #Create dedicated user for OP3
 groupadd openproject
-adduser -g openproject openproject
-
+useradd -mg openproject openproject
 
 #useradd --create-home --gid openproject openproject
 read -p "Enter your Password for openproject user" PWOPENPROJECT
-
 passwd openproject $PWOPENPROJECT
-
 
 #######################################################################################################
 #
@@ -50,96 +49,95 @@ passwd openproject $PWOPENPROJECT
 #
 #########################################################################################################
 
-echo " I will open the /etc/yum.repos.d/CentOS-Base.repo file"
-echo "and Edit for Preconfiguration Postgresql installation."
-
-sleep 5
-cat  > /etc/apt/sources.list.d/openproject.list <<EOF
-EOF
-
-# finish PostgreSQL installation
-
-curl -O http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
-
-rpm -ivh pgdg-centos93-9.3-1.noarch.rpm
-yum list postgres*
-yum install postgresql93-server postgresql93-devel
-service postgresql-9.3 initdb
-chkconfig postgresql-9.3 on
-
-echo 'openproject     openproject     openproject' >> /var/lib/pgsql/9.3/data/pg_ident.conf
+echo 'openproject     openproject     openproject' >> /etc/postgresql/9.1/main/pg_ident.conf
 
 # Uncomment this line in postgresql.conf file to allow connection to localhost of PostgreSQL service
 # not working 
 
-service postgresql-9.3 restart
+service postgresql restart
 
 #create databases
 su - postgres
 #### su - postgre ist not working in the bash shell!!!
-
 psql -U postgres
 ##### psql -U postgres ist not working in the bash shell!!!
 
-#CREATE ROLE openproject LOGIN ENCRYPTED PASSWORD 'my_password' NOINHERIT VALID UNTIL 'infinity';
-#CREATE DATABASE openproject WITH ENCODING='UTF8' OWNER=openproject;
-#CREATE DATABASE openproject_development WITH ENCODING='UTF8' OWNER=openproject;
-#CREATE DATABASE openproject_test WITH ENCODING='UTF8' OWNER=openproject;
-
-cat  > postgres_initial_openProject.sql <<EOF
-CREATE ROLE openproject LOGIN ENCRYPTED PASSWORD 'my_password' NOINHERIT VALID UNTIL 'infinity';
-CREATE DATABASE openproject WITH ENCODING='UTF8' OWNER=openproject;
-CREATE DATABASE openproject_development WITH ENCODING='UTF8' OWNER=openproject;
-CREATE DATABASE openproject_test WITH ENCODING='UTF8' OWNER=openproject;
-EOF
+psql -h localhost -U postgres -W -c "CREATE ROLE openproject LOGIN ENCRYPTED PASSWORD 'my_password' NOINHERIT VALID UNTIL 'infinity';"
+psql -h localhost -U postgres -W -c "CREATE DATABASE openproject WITH ENCODING='UTF8' OWNER=openproject;"
+psql -h localhost -U postgres -W -c "CREATE DATABASE openproject_development WITH ENCODING='UTF8' OWNER=openproject;"
+psql -h localhost -U postgres -W -c "DATABASE openproject_test WITH ENCODING='UTF8' OWNER=openproject;"
 
 # CREATEs not working make a file.sql for this error.
 \q
 exit
-################################## Install Ruby ##########################################################
-# Enable repo
-wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-rpm -Uvh epel-release-6*.rpm
-yum update
 
-# Install necessary packages for Ruby
-yum search libyaml
-yum -y install libyaml libxml2 libxml2-devel libxslt-devel libxml2-devel ruby-mysql mysql-devel ImageMagick-c++ ImageMagick-devel graphviz graphviz-ruby graphviz-devel memcached sqlite-devel
+################################## Install Ruby ##########################################################
+
+# give openproject user right to use rvm 
+#usermod -a -G rvm openproject
+
+curl -sSL https://get.rvm.io | bash -s stable --ruby=2.1
+source /etc/profile.d/rvm.sh
 
 #Switch to user under which will OP run (user "openproject" in my case)
 su openproject -c "bash -l"
 
 # Switch to users home dir or whatever directory you want to install openproject
 cd ~
+rvm reinstall ruby-2.1.2
+
 #Add following line into profile file of the desired user:
 
 echo "source ~/.profile" >> /home/openproject/.bash_profile
 
+# print on screen your Ruby version
+echo "You use on your os the following Ruby version"
+ruby -v
+
 # Install RVM (Ruby Version Manager)
 \curl -L https://get.rvm.io | bash -s stable 
+
+# error $HOME/.rvm/scripts/rvm not exisdent
 source $HOME/.rvm/scripts/rvm
 
 # Install Ruby via RVM
+gem install bundler --version '>=1.5.1'
+
 rvm autolibs disable
-rvm install 2.1.0  # Libraries missing for ruby-2.1.0: libyaml-0.so.2. 
-                  # Refer to your system manual for installing libraries
+rvm install 2.1.0       # Libraries missing for ruby-2.1.0: libyaml-0.so.2. 
+                         # Refer to your system manual for installing libraries
                   
-                  #and this
+                        #and this
                   
-                  #Please be aware that you just installed 
-                  #a ruby that requires 4 patches just to 
-                  #be compiled on an up to date linux system.
-                  #This may have known and unaccounted for 
-                  #security vulnerabilities.
-                  #Please consider upgrading to ruby-2.1.1 
-                  #which will have all of the latest security patches
+                        #Please be aware that you just installed 
+                        #a ruby that requires 4 patches just to 
+                        #be compiled on an up to date linux system.
+                        #This may have known and unaccounted for 
+                        #security vulnerabilities.
+                        #Please consider upgrading to ruby-2.1.1 
+                        #which will have all of the latest security patches
 
 rvm reinstall ruby-2.1.0
 rvm pkg install libyaml
+# error
+# ...
+# 'rvm pkg ...' is deprecated, read about the new autolibs feature: 'rvm help autolibs'
+#
+#
+#
+#
+#Please note that it's required to reinstall all rubies:
+#rvm reinstall all --force
+#
+#Unknown ruby interpreter version (do not know how to handle): all.
+#######################################################################
+#No binary rubies available for: debian/7/x86_64/ruby-2.1.2.
+#Please read 'rvm help mount' to get more information on binary rubies.
+# ...
 rvm reinstall all --force
+
 ### error
 gem install bundler
-
 
 sleep 3
 echo "Ruby bundle Version:$(bundle --version) is installed."
@@ -158,7 +156,7 @@ bundle install
 #Create and configure file in ../openproject/config/database.yml.
 #It should look like this:
 
-cat  > database.yml <<EOF
+cat  > /home/openproject/config/database.yml <<EOF
 production:
       adapter: postgresql
       encoding: utf8
@@ -184,7 +182,7 @@ EOF
 
 
 # Configure email notifications (using gmail account) by creating configuration.yml in openproject/config directory
-cat  > configuration.yml <<EOF
+cat  > ${TMPDIR}configuration.yml <<EOF
 development:                         #main level
 email_delivery_method: :smtp         #main level, will not work
 
@@ -206,7 +204,6 @@ Create Gemfile.plugins file in openproject directory and paste these files:
 #so after final release, the installation could be different. 
 #Consider this step and if you don't want to install plugins, 
 #just skip this step and go to "Finish installation of OpenProject"
-
 cat Gemfile.plugins > configuration.yml <<EOF
 gem "pdf-inspector", "~>1.0.0", :group => :test
 gem "openproject-meeting", :git => "https://github.com/finnlabs/openproject-meeting.git", :branch => "dev" 
@@ -216,7 +213,6 @@ gem "openproject-backlogs", git: "https://github.com/finnlabs/openproject-backlo
 EOF
 
 ##Finish installation of OpenProject
-#
 cd /home/openproject/openproject
 bundle exec rake db:create:all
 bundle exec rake db:migrate
@@ -227,14 +223,10 @@ RAILS_ENV="production" bundle exec rake db:migrate
 RAILS_ENV="production" bundle exec rake assets:precompile
 
 ##Install Apache with Passenger to autostart OpenProject with OS and loadbalance traffic
-#
-#Install necessary packages
-yum install httpd curl-devel httpd-devel apr-devel apr-util-devel
-
 #Grant permission for passenger
 chmod o+x "/home/openproject" 
 
-su - openproject -c "bash -l" 
+su - openproject -c "bash -l"
 
 #Install Passenger gem
 gem install passenger
@@ -244,30 +236,23 @@ gem install passenger
 passenger-install-apache2-module
 
 #Create VirtualHost file for Apache:
-cat  /etc/httpd/conf.d/openproject.conf >  <<EOF
-<VirtualHost *:80>
-      ServerName www.myopenprojectsite.com
+cat  /etc/apache2/conf.d/openproject.conf >  <<EOF
       # !!! Be sure to point DocumentRoot to 'public'!
-      DocumentRoot /home/openproject/openproject/public    
+      Alias     /openproject/            /home/openproject/openproject/public
+      #DocumentRoot /home/openproject/openproject/public
+          
       <Directory /home/openproject/openproject/public>
          # This relaxes Apache security settings.
          AllowOverride all
          # MultiViews must be turned off.
          Options -MultiViews
       </Directory>
-   </VirtualHost>
 EOF
-
-#Finally disable temporarly SELINUX and iptables to be able to access your apache from another computer
-setenforce 0
-service iptables disable
 
 #Start Apache
 #
-service httpd start
+service apache2 restart
 
-##################################################################################################################
-##################################################################################################################
 ##################################################################################################################
 #Now your OP should be accesible on IP address and port 80 (http) of the PC where you have successfully installed openproject.
 #
