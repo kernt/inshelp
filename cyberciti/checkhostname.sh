@@ -38,7 +38,7 @@ fi
 IPArray[0]=0
      
 # failsafe
-if  [ "$4" == "" ] && NS="ns"
+[ "$4" == "" ] && NS="ns"
      
   # note seq may not be available on other UNIX like oses
   for n in $(seq 1 ${MAX})
