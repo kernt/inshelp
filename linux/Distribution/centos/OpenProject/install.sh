@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Script-Name : install.sh
 # Version : 0.0.1
