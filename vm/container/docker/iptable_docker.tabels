@@ -1,0 +1,38 @@
+# Additional for docker 
+#
+# Short names
+#  ext_int = external to internal
+#  int_ext = internal to external
+#  
+#
+#
+#-A FORWARD -i eth0 -o eth1 -p tcp -j ext_int 
+# echo 1 > /proc/sys/net/ipv4/ip_forward
+# or
+# 
+# 
+# echo "none        /cgroup        cgroup        defaults    0    0" >> /etc/fstab
+#
+#
+#
+# sudo mkdir -p /cgroup
+# sudo mount /cgroup
+#
+#
+#
+
+#
+IT=$(type -p iptables)
+
+# Anbinden eines LAN an das Internet
+$IP -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+#
+$IT -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+#
+$IT -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+$IT -A FORWARD -i eth1 -o eth0 -j ACCEPT
+#
+$IT -A localhost -p tcp -j ACCEPT 
+$IT -A localhost -p udp -j ACCEPT 
+$IT -A localhost -p icmp -j ACCEPT
+
