@@ -1,0 +1,8 @@
+#!/bin/bash
+# echo 1 > /proc/sys/net/ipv4/ip_forward
+# 
+NIC=$1
+#
+NETWORK=$2:192.168.0.0
+
+iptables -t nat -A POSTROUTING -s $NETWORK/24 -o $NIC -j MASQUERADE
