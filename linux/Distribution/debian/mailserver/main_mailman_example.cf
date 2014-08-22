@@ -1,0 +1,11 @@
+myhostname = $HOST.$FQDN
+mydomain = $FQDN1
+myorigin = $mydomain
+mydestination = localhost, $FQDN1, $FQDN2, $FQDN3
+mynetworks_style = host
+
+alias_maps = hash:/etc/postfix/aliases, hash:/var/lib/mailman/data/aliases
+alias_database = $alias_maps
+virtual_alias_maps = hash:/etc/postfix/virtual, hash:/var/lib/mailman/data/virtual-mailman
+
+recipient_delimiter = +
