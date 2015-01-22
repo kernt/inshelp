@@ -26,8 +26,8 @@ function usage {
         echo "Usage: $SCRIPTNAME [-h] [-v] [-o arg] file ..." >&2
                 [[ $# -eq 1 ]] && exit $1 || exit $EXIT_FAILURE
 }
-. ./pre_opsi_ins.sh execute opsi_ins.sh 
-. ./opsi_func.sh execute opsi_ins.sh 
+#. ./pre_opsi_ins.sh  # execute opsi_ins.sh 
+. ./opsi_func.sh     # execute opsi_ins.sh 
 onlyroot
 
 JREVERSION="$(java -version)"

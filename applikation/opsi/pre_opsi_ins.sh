@@ -53,3 +53,7 @@ deb http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40/Debian_7
 
 echo "add repositorie gpg key for opsi "
 wget -O - http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40/Debian_7.0/Release.key | apt-key add -
+ 
+apt-get update
+
+
