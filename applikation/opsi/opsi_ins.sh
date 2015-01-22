@@ -29,6 +29,9 @@ function usage {
 #. ./pre_opsi_ins.sh  # execute opsi_ins.sh 
 . ./opsi_func.sh     # execute opsi_ins.sh 
 onlyroot
+opsinstall
+opsiconfig
+opsiconfupdate
 
 JREVERSION="$(java -version)"
 

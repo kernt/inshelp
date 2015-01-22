@@ -31,9 +31,8 @@ EXIT_BUG=10
 #OPTFILE=""
 fbname=$(basename "$1".txt)
 # simple help funktion,  in this file because this function is only for the script itself
-function usage {
-        echo "Usage: $SCRIPTNAME [-h] [-v] [-o arg] file ..." >&2
-                [[ $# -eq 1 ]] && exit $1 || exit $EXIT_FAILURE
+function genpw {
+echo "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -1)"
 }
 
 function genpw {
@@ -47,29 +46,28 @@ if [ $(id -u) != 0 ]; then
 fi
 }
 
-function md5put {
-md5sum $0 >>  ./md5check-opsi.sum
-}
+#function md5put {
+#md5sum $0 >>  ./md5check-opsi.sum
+#}
 
-function md5get {
-md5sum  << ./md5check-opsi.sum 
-}
+#function md5get {
+#md5sum  << ./md5check-opsi.sum 
+#}
 
 function opsinstall {
 aptitude update
 aptitude safe-upgrade
 aptitude remove tftpd
 update-inetd --remove tftpd
-aptitude install opsi-atftpd
-aptitude install opsi-depotserver
-aptitude install opsi-configed
+aptitude -y install opsi-atftpd
+aptitude -y install opsi-depotserver
+aptitude -y install opsi-configed
 }
 
 function opsiconfig {
 opsi-setup --auto-configure-samba
 opsi-setup --configure-mysql
 }
-
 
 function opsiconfupdate {
 opsi-setup --init-current-config
@@ -84,7 +82,7 @@ echo "" >> /etc/opsi/backendManager/dispatch.conf
 
 funtion jreinstall {
 aptitude update
-aptitude install openjdk-7-jre icedtea-7-plugin
+aptitude -y install openjdk-7-jre icedtea-7-plugin
 }
 
 #funktion md5vlalidsh {
