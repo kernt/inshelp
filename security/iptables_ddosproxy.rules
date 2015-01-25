@@ -1,0 +1,122 @@
+# orgin : 
+# https://mattwilcox.net/archives/unexpected-ddos-blocking-china-with-ipset-and-iptables/
+# https://wiki.debian.org/iptables
+# https://r00t-services.net/knowledgebase/14/Homemade-DDoS-Protection-Using-IPTables-SYNPROXY.html
+# http://www.server-wissen.de/security/was-tun-bei-einem-ddos-angriff-anti-ddos/
+#
+*filter
+#
+#  Allow all loopback (lo0) traffic and drop all traffic to 127/8 that doesn't use lo0
+-A INPUT -i lo -j ACCEPT
+-A INPUT -d 127.0.0.0/8 -j REJECT
+#
+#################### SYN-Food #################################################################
+# allow max. 30 access in 2sec.
+# if you have a slow Internet connection use a lower max. access in 2sec. configuration
+# 
+# -A INPUT -p tcp --syn -m limit --limit 2/s --limit-burst 30 -j ACCEPT
+
+# 
+#
+################################################################################################
+################### Ping-Flood #################################################################
+#
+# Only 1 Ping per sec.
+-A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s -j ACCEPT
+#
+######## SYN-Food Improfments only for with the 3.12 kernel and IPTables version 1.4.21 or better.########
+######## "SYNPROXY" Against SYN Floods & Other DDoS Attacks
+#Adjusting Your Kernel Settings if you will use this Improvments for your system !! ######
+#Because the "SYNPROXY" feature uses syncookies and syncookies use timestamps, 
+#we have to enable both in our kernel settings. You can either edit your /etc/sysctl.conf 
+#to reflect these settings or apply them directly with:
+#
+#sysctl -w net/ipv4/tcp_syncookies=1
+#sysctl -w net/ipv4/tcp_timestamps=1
+#
+#Furthermore we have to adjust the conntrack settings, 
+#because a major part of the "SYNPROXY" feature is to not track TCP connections that aren't fully established, 
+#because that needs a lot of resources. 
+#The following setting will exclude ACK packets from connection tracking and mark them as INVALID and, 
+#amongst other things, make your server absorb ACK Floods.
+#
+#sysctl -w net/netfilter/nf_conntrack_tcp_loose=0
+#
+#If that command returns an error, try to apply it later when the conntrack kernel module is actually active. 
+#Furthermore it makes sense to increase conntrack's hash size and the conntrack_max setting:
+#
+#echo 2500000 > /sys/module/nf_conntrack/parameters/hashsize
+#sysctl -w net/netfilter/nf_conntrack_max=2000000
+#
+#These are only the most important settings, 
+#there are lots of other kernel settings that can be tweaked in order to increase the network performance 
+#with many connections/packets, but covering all of them wouldn't be possible with this small tutorial. 
+#So lets continue with the actual iptables rules.
+#
+#The first rule we insert, excludes SYN packets from connection tracking, 
+#because that would use a lot of resources and obviously we don't want that:
+#iptables -t raw -I PREROUTING -p tcp -m tcp --syn -j CT --notrack
+#
+# The „raw“ table handles untracked connections, 
+# the "CT" target stands for "conntrack" and the "--notrack" option excludes them from tracking. 
+# This rule should pretty much explain itself.
+#iptables -I INPUT -p tcp -m tcp -m conntrack --ctstate INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
+# This rule matches the SYN packets (UNTRACKED as per previous rule) and ACK packets (INVALID as per "nf_conntrack_tcp_loose=0") 
+# and forwards them to the SYNPROXY target, which then verifies the syncookies (parallel, 
+# which wasn't possible previously) and establishes the full TCP connections. 
+# At last we add a rule that drops every packet that the previous rule didn't catch, read bad packets/DDoS:
+#iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+#
+#That's it already. If you want to protect a specific IP which is under DDoS attack, 
+#you can adjust the rules like this:
+#
+#iptables -t raw -I PREROUTING -p tcp -m tcp -d 192.168.0.50 --syn -j CT --notrack
+#iptables -I INPUT -p tcp -m tcp -d 192.168.0.50 -m conntrack --ctstate INVALID,UNTRACKED -j SYNPROXY --sack-perm --timestamp --wscale 7 --mss 1460
+#iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+#########################################################################################################
+################### HTTP Floods #########################################################################
+#
+# Now let's take this POST flood for example, which represents a real case scenario of a server which is attacked by a Pushdo
+#botnet. In our Apache access logs we see lots of these requests that kill our Apache:
+#1.2.3.4 - [02/Dec/2013:14:54:40 +0100] "POST /?ptrxcz_9JIkQz8jIZ12hHs8Qks7j HTTP/1.1" 200
+#iptables -A INPUT -p tcp --dport 80 -m string --string "ptrxcz" --algo bm -j DROP
+# 
+#This will block every TCP packet with destination port 80 that contains the pattern we found in our access logs. 
+#It's possible to adapt this to all kinds of applications that are under layer 7 (D)DoS attack, 
+#where every packet contains a certain string. To view the content of each packet, you can use tcpdump for instance. 
+#You would use tcpdump -nnX dst host 1.2.3.4 and port http to view the content of every packet with destination 
+#IP 1.2.3.4 and port 80, where the destination IP would be the IP your website is hosted on. 
+#Alternatively you can use tcpdump -nnA dst host 1.2.3.4 and port http which might make it easier 
+#to understand the output, because it doesn't include the hex code, but ASCII only.
+###########################################################################################################
+#  Accept all established inbound connections
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#
+#  Allow all outbound traffic - you can modify this to only allow certain traffic
+-A OUTPUT -j ACCEPT
+#
+#  Allow HTTP and HTTPS connections from anywhere (the normal ports for websites and SSL).
+-A INPUT -p tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp --dport 443 -j ACCEPT
+#
+# Allow SSH connections
+#
+#  The -dport number should be the same port number you set in sshd_config
+#
+-A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
+#
+#  Allow ping
+-A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+#
+#  Log iptables denied calls
+-A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+#
+#  Drop all other inbound - default deny unless explicitly allowed policy
+-A INPUT -j DROP
+-A FORWARD -j DROP
+#
+##################### Tools ###############################################################
+# List of IPs produced, which connect to the server.
+#netstat -ntu | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -n
+#
+COMMIT
