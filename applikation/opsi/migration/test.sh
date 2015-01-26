@@ -24,12 +24,7 @@ fbname=$(basename "$1".txt)
 
 #. ../opsi_func.sh     # execute opsi_ins.sh
 
-
 if [ -f modules ] ; then
  cp ./modules /etc/opsi/
- echo "Copy modules file to /etc/opsi/" 
- chmod 444 /etc/opsi/modules
- chown opsiconfd:opsiadmin /etc/opsi/modules  
-fi
-
-exit 0
+ echo "Copy modules file to /etc/opsi/"
+if

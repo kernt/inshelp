@@ -80,7 +80,7 @@ function opsidispatc {
 echo "" >> /etc/opsi/backendManager/dispatch.conf
 }
 
-funtion jreinstall {
+function jreinstall {
 aptitude update
 aptitude -y install openjdk-7-jre icedtea-7-plugin
 }
