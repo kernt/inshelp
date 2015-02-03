@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Example: opsi_ins.sh $#DOMAIN $TESTPW
+# Example: opsi_lic.sh $#DOMAIN $TESTPW
 #
 # Sources:
 # http://download.uib.de/opsi_stable/doc/opsi-getting-started-stable-de.pdf
@@ -23,7 +23,6 @@ EXIT_BUG=10
 fbname=$(basename "$1".txt)
 
 #. ../opsi_func.sh     # execute opsi_ins.sh
-
 
 if [ -f modules ] ; then
  cp ./modules /etc/opsi/
