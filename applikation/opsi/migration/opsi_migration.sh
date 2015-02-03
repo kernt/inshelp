@@ -1,12 +1,14 @@
 #!/bin/bash
 #
-# Example: opsi_ins.sh $#DOMAIN $TESTPW
+# Example: opsi_migration.sh $#DOMAIN $TESTPW
 #
 # Sources:
 # http://download.uib.de/opsi_stable/doc/opsi-getting-started-stable-de.pdf
+# http://download.uib.de/opsi_stable/doc/html/en/opsi-getting-started/opsi-getting-started.html#opsi-getting-started-installation-base-centos
+# 
 # Description:
 ###########################################################################################
-## Some Info and so one.
+## 
 ## 
 ###########################################################################################
 # Name of your script.
