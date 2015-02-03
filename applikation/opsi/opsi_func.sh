@@ -31,6 +31,35 @@ EXIT_BUG=10
 #OPTFILE=""
 fbname=$(basename "$1".txt)
 # simple help funktion, in this file because this function is only for the script itself.
+
+machine=$(uname -m)
+os=$(uname -s)
+
+# Platform detection
+function osdetect {
+if test -f "/etc/lsb-release" && grep -q DISTRIB_ID /etc/lsb-release; then
+  platform=$(grep DISTRIB_ID /etc/lsb-release | cut -d "=" -f 2 | tr '[A-Z]' '[a-z]')
+  #platform_version=`grep DISTRIB_RELEASE /etc/lsb-release | cut -d "=" -f 2`
+elif test -f "/etc/debian_version"; then
+  platform="debian"
+  #platform_version=`cat /etc/debian_version`
+elif test -f "/etc/redhat-release"; then
+  platform=$(sed 's/^\(.\+\) release.*/\1/' /etc/redhat-release | tr '[A-Z]' '[a-z]')
+  #platform_version=`sed 's/^.\+ release \([.0-9]\+\).*/\1/' /etc/redhat-release`
+  return $platform
+}
+
+# Check whether a command exists - returns 0 if it does, 1 if it does not
+function exists {
+  if command -v $1 >/dev/null 2>&1
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
 function genpw {
 echo "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -1)"
 }
