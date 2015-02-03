@@ -26,12 +26,7 @@ EXIT_ERROR=2
 # unknown ERROR
 EXIT_BUG=10
 # Variable for optionsswitch
-#OPTFILE=""
 fbname=$(basename "$1".txt)
-# simple help funktion
-#function usage {
-#echo "Usage: $SCRIPTNAME [-h] [-v] [-o arg] file ..." >&2
-#[[ $# -eq 1 ]] && exit $1 || exit
 
 # Variables
 FQDNAME="getent hosts $(hostname -f)"
@@ -56,4 +51,4 @@ wget -O - http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40/De
  
 apt-get update
 
-
+exit 0
