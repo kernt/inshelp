@@ -27,22 +27,29 @@ function usage {
 }
 
 # Report opsi install
-touch /root/opsi.installed
+#touch /root/opsi.installed
 
-
-#. ./pre_opsi_ins.sh  # execute opsi_ins.sh 
-. ./opsi_func.sh      # execute opsi_ins.sh 
+. ./pre_opsi_ins.sh   # execute pre_opsi_ins.sh for por pre depend requested packages and configurations
+. ./opsi_func.sh      # execute opsi_ins.sh
 # make shure the login user is ROOT
 onlyroot
 
-# do install opsi services 
+# do install opsi services
+#if [ !  $(ls -A /etc/opsi/) ]; then
 opsinstall
+#else
+#    echo "Error: runs more than once a time!"
+#    echo "This script is only for a initial opsi Installation!"
+#    echo "because this error this script will be exit now"
+#    sleep 4
+#    exit 1
+#fi
 
-# do opsi initial configuration use once time !
-# 
+# function . Do opsi initial configuration, use only for your first installation !
+# test of files time its a well idea
 opsiconfig
 
-# do update all opsi config files function source is opsi_func.sh
+# function. Update your opsi configuraton files only for first installation
 opsiconfupdate
 
 # Show your Java version
@@ -53,8 +60,14 @@ echo "user update-alternatives --config java if you have any error."
 sleep 3
 
 # Install initial Products from UIB GmbH
-if [  ] then ;
+if [ !  $(ls -A /var/lib/opsi/depot) ]; then 
 . ./opsi-produc-initial.sh
+else
+    echo "Error: runs more than once a time!"
+    echo "This script is only for a initial opsi Installation!"
+    echo "because this error this script will be exit now"
+    sleep 4
+    exit 1
+fi
 
-
-
+exit 0
