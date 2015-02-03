@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # Script-Name : $@.sh
-# Version : 0.01
-# Autor : Tobias Kern
-# Datum : $DATE
-# Lizenz : GPLv3
-# Depends :
-# Use :
+# Version     : 0.01
+# Autor       : Tobias Kern
+# Datum       : Di 03 Feb 2015 15:01:55 CET
+# Lizenz      : GPLv3
+# Depends     : 
+# Use         : 
 #
 # Example: opsi_ins.sh $#DOMAIN $TESTPW
 #
@@ -30,15 +30,17 @@ EXIT_BUG=10
 # Variable for optionsswitch
 #OPTFILE=""
 fbname=$(basename "$1".txt)
-# simple help funktion,  in this file because this function is only for the script itself
+# simple help funktion, in this file because this function is only for the script itself.
 function genpw {
 echo "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -1)"
 }
 
+# genarate pasword with 16 characters
 function genpw {
 cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 18 | head -1
 }
 
+# execute only if user ROOT.
 function onlyroot {
 if [ $(id -u) != 0 ]; then
     echo "Script is only for root user! Ask your Administrator"
@@ -54,6 +56,7 @@ fi
 #md5sum  << ./md5check-opsi.sum 
 #}
 
+# opsi base installtion is only for first installation
 function opsinstall {
 aptitude update
 aptitude safe-upgrade
@@ -64,24 +67,26 @@ aptitude -y install opsi-depotserver
 aptitude -y install opsi-configed
 }
 
+# update your opsi configuraton files only for first installation. 
 function opsiconfig {
 opsi-setup --auto-configure-samba
 opsi-setup --configure-mysql
 }
 
+# update your customized configurations
 function opsiconfupdate {
 opsi-setup --init-current-config
 opsi-setup --set-rights
 service opsiconfd restart
 service opsipxeconfd restart
 }
-
+# add your licenses
 function opsidispatc {
 echo "" >> /etc/opsi/backendManager/dispatch.conf
 }
 
+
 function jreinstall {
-aptitude update
 aptitude -y install openjdk-7-jre icedtea-7-plugin
 }
 
