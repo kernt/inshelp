@@ -39,9 +39,9 @@ aptitude -y install samba samba-common smbclient cifs-utils samba-doc
 aptitude -y install mysql-server 
 aptitude -y install openjdk-7-jre
 
-#if  [] 
-touch /etc/apt/sources.list.d/opsi.list
-
+#if  [ $(ls -A /etc/apt/sources.list.d/opsi.list)] then; 
+#touch /etc/apt/sources.list.d/opsi.list
+#fi
 echo  "
 deb http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40/Debian_7.0 ./
 " >> /etc/apt/sources.list.d/opsi.list
