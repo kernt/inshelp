@@ -5,6 +5,7 @@
 # Sources:
 # http://download.uib.de/opsi_stable/doc/opsi-getting-started-stable-de.pdf
 # Description:
+# add your licenses file. 
 ###########################################################################################
 ## Some Info and so one.
 ## 
