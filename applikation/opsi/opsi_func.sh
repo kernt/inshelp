@@ -119,6 +119,68 @@ function jreinstall {
 aptitude -y install openjdk-7-jre icedtea-7-plugin
 }
 
+set_hostname () {
+i=0
+while [ $i -eq 0 ]; do
+        if [ "$forcehostname" = "" ]; then
+        printf "Please enter a fully qualified hostname (for example, host.example.com): "
+        read line
+                else
+                logger_info "Setting hostname to $forcehostname"
+                line=$forcehostname
+        fi
+        
+        if ! is_fully_qualified $line; then
+        logger_info "Hostname $line is not fully qualified."
+        else
+        hostname $line
+        detect_ip
+        
+        if grep $address /etc/hosts; then
+        logger_info "Entry for IP $address exists in /etc/hosts."
+        logger_info "Updating with new hostname."
+        shortname=`echo $line | cut -d"." -f1`
+        sed -i "s/^$address\([\s\t]+\).*$/$address\1$line\t$shortname/" /etc/hosts
+                else
+                logger_info "Adding new entry for hostname $line on $address to /etc/hosts."
+                printf "$address\t$line\t$shortname\n" >> /etc/hosts
+        fi
+        i=1
+        fi
+done
+}
+
+is_fully_qualified () {
+case $1 in
+localhost.localdomain)
+logger_info "Hostname cannot be localhost.localdomain."
+return 1
+;;
+*.localdomain)
+logger_info "Hostname cannot be *.localdomain."
+return 1
+;;
+*.*)
+logger_info "Hostname OK: fully qualified as $1"
+return 0
+;;
+esac
+logger_info "Hostname $name is not fully qualified."
+return 1
+}
+
+# download()
+# Use $download to download the provided filename or exit with an error.
+download() {
+if $download $1
+then
+success "Download of $1"
+return $?
+else
+fatal "Failed to download $1."
+fi
+}
+
 #funktion md5vlalidsh {
 ## 
 #md5putresult=md5get
