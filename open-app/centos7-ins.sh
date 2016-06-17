@@ -1,8 +1,7 @@
 #!/bin/bash
 yum install vim
 
-
-cat < /etc/yum.repos.d/ox.repo > EOF
+cat << EOF >> /etc/yum.repos.d/ox.repo
 [ox-appsuiteui]
 name=Open-Xchange-appsuiteui
 baseurl=http://software.open-xchange.com/products/appsuite/stable/appsuiteui/RHEL7/
@@ -70,7 +69,7 @@ chown open-xchange:open-xchange /var/opt/filestore
 
 rm /etc/httpd/conf.d/welcome.conf
 
-cat < /etc/httpd/conf.d/proxy_http.conf > EOF
+cat << EOF >> /etc/httpd/conf.d/proxy_http.conf
 LoadModule proxy_http_module modules/mod_proxy_http.so
 
 <IfModule mod_proxy_http.c>
@@ -183,7 +182,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
 
 EOF
 
-cat < /etc/httpd/conf.d/ox.conf > EOF
+cat << EOF >> /etc/httpd/conf.d/ox.conf
 <VirtualHost *:80>
        ServerAdmin webmaster@localhost
 
