@@ -1,0 +1,13 @@
+mcast eth0 239.0.0.10 694 1 0
+ 
+warntime 4
+deadtime 5
+initdead 15
+keepalive 2
+ 
+#Re-balance les services sur le node primaire quqnd il revient en ligne
+auto_failback on
+ 
+#Serveurs du cluster
+node node1
+node node2
