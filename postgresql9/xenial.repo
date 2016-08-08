@@ -1,0 +1,2 @@
+#/bin/bash
+deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main >> /etc/apt/sources.list.d/pgdg.list 
