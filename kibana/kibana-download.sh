@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://github.com/elastic/kibana/releases?after=v4.1.6 
 
 KIBANA-VER="4.3.0"
 
