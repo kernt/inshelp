@@ -1,7 +1,7 @@
 ###  Example : 	proxy-port.conf
 
-Senario Apache Server with one that used a specific Port 9100
-For a better usebility we can use is as a genaral way from 80 Port to 9100
+Senario Apache Server with one that used a specific Port 9100 .
+For a better usebility we can use it as a genaral way from 80 Port to 9100. 
 
 ```
 +----------+    +-----------------+   +-----------------------+
@@ -13,4 +13,4 @@ For a better usebility we can use is as a genaral way from 80 Port to 9100
 * proxy
 * proxy_http
 
-#### 
+#### Example : 
