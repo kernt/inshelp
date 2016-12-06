@@ -1,0 +1,5 @@
+# Importend ip forwarding must be avtiveted. 
+# sysctl net.ipv4.ip_forward=1
+
+iptables -t nat -A PREROUTING -p tcp --dport 5222 -j DNAT --to-destination 2.2.2.2:5222
+iptables -t nat -A POSTROUTING -j MASQUERADE
