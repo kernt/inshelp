@@ -12,5 +12,3 @@ For a better usebility we can use it as a genaral way from 80 Port to 9100.
 #### Depend modules
 * proxy
 * proxy_http
-
-#### Example : 
