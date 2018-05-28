@@ -1,16 +1,3 @@
-#!/bin/bash
-#
-# Script-Name : otrs3ins.sh
-# Version : 0.01
-# Autor : Tobias Kern
-# Datum : 19.12.2014
-# Lizenz : GPLv3
-# Depends :
-# Use :
-#
-# Example:
-#
-# Description:
 ###########################################################################################
 ## Use it only if know what are you doing!
 ##
